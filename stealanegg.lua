@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui")
 
@@ -12,7 +14,7 @@ sg.Name = "EX_StealAnEgg_Ultimate"
 sg.ResetOnSpawn = false
 
 -- ==========================================
--- 1. MAIN UI FRAME (Kategori & Layout)
+-- 1. MAIN UI FRAME
 -- ==========================================
 local f = Instance.new("Frame", sg)
 f.Size = UDim2.new(0, 440, 0, 260)
@@ -33,7 +35,6 @@ local stroke = Instance.new("UIStroke", f)
 stroke.Color = Color3.fromRGB(160, 60, 240)
 stroke.Thickness = 1.5
 
--- Header
 local title = Instance.new("TextLabel", f)
 title.Size = UDim2.new(1, -40, 0, 35)
 title.Position = UDim2.new(0, 12, 0, 4)
@@ -44,7 +45,6 @@ title.TextSize = 13
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol Minimize
 local minBtn = Instance.new("TextButton", f)
 minBtn.Size = UDim2.new(0, 24, 0, 24)
 minBtn.Position = UDim2.new(1, -30, 0, 8)
@@ -55,7 +55,6 @@ minBtn.TextSize = 14
 minBtn.Font = Enum.Font.GothamBold
 Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
 
--- Custom Icon "EX"
 local minIcon = Instance.new("TextButton", sg)
 minIcon.Size = UDim2.new(0, 42, 0, 42)
 minIcon.Position = UDim2.new(0, 20, 0, 20)
@@ -137,13 +136,13 @@ btnTabPerf.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- 3. KONTEN TAB: MAIN (AUTO STEAL)
+-- 3. KONTEN TAB: MAIN
 -- ==========================================
-local stealSettings = { running = false, method = "Instant", target = "All", filterText = "" }
+local stealSettings = { running = false, method = "Fly", target = "All", filterText = "" }
 
 local btnMethod = Instance.new("TextButton", pageMain)
 btnMethod.Size = UDim2.new(1, 0, 0, 30)
-btnMethod.Text = "Metode: INSTAN (Teleport)"
+btnMethod.Text = "Metode: TERBANG (Aman/Noclip)"
 btnMethod.BackgroundColor3 = Color3.fromRGB(40, 20, 70)
 btnMethod.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnMethod.Font = Enum.Font.GothamMedium
@@ -163,7 +162,7 @@ Instance.new("UICorner", btnTarget).CornerRadius = UDim.new(0, 6)
 local txtFilter = Instance.new("TextBox", pageMain)
 txtFilter.Size = UDim2.new(1, 0, 0, 30)
 txtFilter.Position = UDim2.new(0, 0, 0, 76)
-txtFilter.PlaceholderText = "Ketik filter (Misal: Mythic, Cosmic, Lava)"
+txtFilter.PlaceholderText = "Ketik filter (Misal: Mythic, Cosmic)"
 txtFilter.Text = ""
 txtFilter.BackgroundColor3 = Color3.fromRGB(25, 12, 40)
 txtFilter.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -186,20 +185,19 @@ Instance.new("UICorner", btnStart).CornerRadius = UDim.new(0, 6)
 local stLabel = Instance.new("TextLabel", pageMain)
 stLabel.Size = UDim2.new(1, 0, 0, 20)
 stLabel.Position = UDim2.new(0, 0, 0, 165)
-stLabel.Text = "Berdiri di base kamu sebelum klik START!"
+stLabel.Text = "Berdiri di base kamu lalu klik START!"
 stLabel.BackgroundTransparency = 1
 stLabel.TextColor3 = Color3.fromRGB(190, 160, 220)
 stLabel.Font = Enum.Font.GothamMedium
 stLabel.TextSize = 11
 
--- Interaksi Tombol Tab Main
 btnMethod.MouseButton1Click:Connect(function()
-    if stealSettings.method == "Instant" then
-        stealSettings.method = "Normal"
-        btnMethod.Text = "Metode: NORMAL (Jalan Kaki)"
-    else
+    if stealSettings.method == "Fly" then
         stealSettings.method = "Instant"
-        btnMethod.Text = "Metode: INSTAN (Teleport)"
+        btnMethod.Text = "Metode: INSTAN (Teleport Cepat)"
+    else
+        stealSettings.method = "Fly"
+        btnMethod.Text = "Metode: TERBANG (Aman/Noclip)"
     end
 end)
 
@@ -216,7 +214,7 @@ btnTarget.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- 4. KONTEN TAB: PERFORMA (ANTI-LAG)
+-- 4. KONTEN TAB: PERFORMA
 -- ==========================================
 local function createPerfButton(txt, yPos, cb)
     local b = Instance.new("TextButton", pagePerf)
@@ -231,35 +229,35 @@ local function createPerfButton(txt, yPos, cb)
     b.MouseButton1Click:Connect(cb)
 end
 
-createPerfButton("🧹 Hapus Partikel & Efek Visual", 0, function()
+createPerfButton("🧹 Hapus Partikel & Efek", 0, function()
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Beam") then v:Destroy() end
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") then v:Destroy() end
         end
     end)
 end)
 
-createPerfButton("🐾 Hapus Hewan / Monster / Pet", 40, function()
+createPerfButton("🐾 Hapus Hewan / Monster", 40, function()
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("Model") and (v.Name:lower():find("pet") or v.Name:lower():find("guardian") or v.Name:lower():find("chicken") or v.Name:lower():find("boss")) then
+            if v:IsA("Model") and (v.Name:lower():find("pet") or v.Name:lower():find("guardian")) then
                 if not Players:GetPlayerFromCharacter(v) then v:Destroy() end
             end
         end
     end)
 end)
 
-createPerfButton("🏡 Sembunyikan Dekorasi Map", 80, function()
+createPerfButton("🏡 Hapus Dekorasi & Map", 80, function()
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") and (v.Name:lower():find("decora") or v.Name:lower():find("tree") or v.Name:lower():find("prop")) then
+            if v:IsA("BasePart") and (v.Name:lower():find("decora") or v.Name:lower():find("tree")) then
                 v.Transparency = 1; v.CanCollide = false
             end
         end
     end)
 end)
 
-createPerfButton("🚀 SUPER MAX FPS BOOST (Grafik Kentang)", 120, function()
+createPerfButton("🚀 SUPER FPS BOOST (Grafik Kentang)", 120, function()
     pcall(function()
         settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
         game:GetService("Lighting").GlobalShadows = false
@@ -267,47 +265,93 @@ createPerfButton("🚀 SUPER MAX FPS BOOST (Grafik Kentang)", 120, function()
             if v:IsA("BasePart") then
                 v.Material = Enum.Material.SmoothPlastic
                 v.Reflectance = 0
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 1
             end
         end
     end)
 end)
 
 -- ==========================================
--- 5. LOGIKA AUTO STEAL ROBUST
+-- 5. LOGIKA NOCLIP & AUTO STEAL
 -- ==========================================
 local baseCFrame = nil
+local noclipConnection = nil
+
+local function toggleNoclip(state)
+    if state then
+        if not noclipConnection then
+            noclipConnection = RunService.Stepped:Connect(function()
+                local char = player.Character
+                if char then
+                    for _, v in pairs(char:GetDescendants()) do
+                        if v:IsA("BasePart") and v.CanCollide then
+                            v.CanCollide = false -- Tembus tembok supaya ga kepental
+                        end
+                    end
+                end
+            end)
+        end
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
+    end
+end
 
 local function getBestEgg()
     local possibleEggs = {}
-    -- Cari semua part/model yang namanya ada unsur telur
     for _, v in pairs(Workspace:GetDescendants()) do
         local n = v.Name:lower()
         if v:IsA("Model") and (n:find("egg") or n:find("telur")) then
-            local primary = v.PrimaryPart or v:FindFirstChildWhichIsA("BasePart")
-            if primary then table.insert(possibleEggs, {part = primary, name = n, obj = v}) end
-        elseif v:IsA("BasePart") and (n:find("egg") or n:find("telur")) then
-            if not v.Parent:FindFirstChild("Humanoid") then table.insert(possibleEggs, {part = v, name = n, obj = v}) end
-        elseif v:IsA("ProximityPrompt") and (v.ActionText:lower():find("steal") or v.ActionText:lower():find("grab") or n:find("egg")) then
-            table.insert(possibleEggs, {part = v.Parent, name = v.Parent.Name:lower(), obj = v.Parent, prompt = v})
+            local p = v.PrimaryPart or v:FindFirstChildWhichIsA("BasePart")
+            if p then table.insert(possibleEggs, {part = p, name = n, prompt = v:FindFirstChildWhichIsA("ProximityPrompt", true)}) end
         end
     end
     
-    -- Terapkan Filter
-    for _, eggData in pairs(possibleEggs) do
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    local bestEgg = nil
+    local closestDist = math.huge
+
+    for _, egg in pairs(possibleEggs) do
         local pass = true
-        if stealSettings.target == "Filter" and txtFilter.Text ~= "" then
+        
+        -- MENCEGAH MONDAR-MANDIR DI BASE (Abaikan telur yg jaraknya di bawah 50 stud dari base)
+        if baseCFrame and (egg.part.Position - baseCFrame.Position).Magnitude < 50 then
+            pass = false 
+        end
+        
+        if pass and stealSettings.target == "Filter" and txtFilter.Text ~= "" then
             pass = false
             local fText = txtFilter.Text:lower()
             for word in string.gmatch(fText, '([^,]+)') do
-                word = word:match("^%s*(.-)%s*$") -- Trim spasi
-                if word ~= "" and eggData.name:find(word) then pass = true; break end
+                word = word:match("^%s*(.-)%s*$")
+                if word ~= "" and egg.name:find(word) then pass = true; break end
             end
         end
-        if pass then return eggData end
+        
+        if pass then
+            local dist = (egg.part.Position - hrp.Position).Magnitude
+            if dist < closestDist then
+                closestDist = dist
+                bestEgg = egg
+            end
+        end
     end
-    return nil
+    return bestEgg
+end
+
+local function flyTo(targetCFrame)
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    local dist = (hrp.Position - targetCFrame.Position).Magnitude
+    local time = dist / 60 -- Kecepatan terbang (makin gede angkanya makin cepet)
+    local tween = TweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
+    tween:Play()
+    tween.Completed:Wait()
 end
 
 btnStart.MouseButton1Click:Connect(function()
@@ -320,72 +364,62 @@ btnStart.MouseButton1Click:Connect(function()
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         if hrp then baseCFrame = hrp.CFrame end -- Simpan lokasi base
         
+        toggleNoclip(true) -- Aktifkan tembus tembok
+        
         task.spawn(function()
             while stealSettings.running do
-                task.wait(0.5)
+                task.wait(0.1)
                 local char = player.Character
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                local hum = char and char:FindFirstChild("Humanoid")
-                if not hrp or not hum then continue end
+                if not hrp then continue end
+                
+                -- Hapus kecepatan (Velocity) supaya ga gila pas teleport
+                hrp.Velocity = Vector3.zero
+                hrp.RotVelocity = Vector3.zero
                 
                 local egg = getBestEgg()
                 if egg then
-                    stLabel.Text = "Mengambil: " .. egg.name
+                    stLabel.Text = "Curi: " .. egg.name
                     
-                    if stealSettings.method == "Instant" then
-                        -- Teleport ke telur
-                        hrp.CFrame = egg.part.CFrame
-                        task.wait(0.3)
-                        
-                        -- Bypass cara ambil (Sentuh & Prompt)
-                        if firetouchinterest then
-                            firetouchinterest(hrp, egg.part, 0); task.wait(0.1); firetouchinterest(hrp, egg.part, 1)
-                        end
-                        if egg.prompt then fireproximityprompt(egg.prompt) end
-                        
-                        task.wait(0.4)
-                        -- Teleport balik ke Base
-                        if baseCFrame then hrp.CFrame = baseCFrame end
-                        task.wait(0.5)
-                        
-                    elseif stealSettings.method == "Normal" then
-                        -- Jalan ke telur
-                        hum:MoveTo(egg.part.Position)
-                        local timeout = 0
-                        while (hrp.Position - egg.part.Position).Magnitude > 6 and timeout < 6 do
-                            task.wait(0.2); timeout = timeout + 0.2
-                        end
-                        
-                        if firetouchinterest then
-                            firetouchinterest(hrp, egg.part, 0); task.wait(0.1); firetouchinterest(hrp, egg.part, 1)
-                        end
-                        if egg.prompt then fireproximityprompt(egg.prompt) end
-                        
-                        -- Jalan balik ke Base
-                        if baseCFrame then
-                            hum:MoveTo(baseCFrame.Position)
-                            local timeout2 = 0
-                            while (hrp.Position - baseCFrame.Position).Magnitude > 6 and timeout2 < 6 do
-                                task.wait(0.2); timeout2 = timeout2 + 0.2
-                            end
+                    if stealSettings.method == "Fly" then
+                        -- Terbang ke telur
+                        flyTo(egg.part.CFrame + Vector3.new(0, 2, 0))
+                    else
+                        -- Instan (Teleport)
+                        hrp.CFrame = egg.part.CFrame + Vector3.new(0, 2, 0)
+                        task.wait(0.2)
+                    end
+                    
+                    -- Trigger ambil telur
+                    if firetouchinterest then
+                        firetouchinterest(hrp, egg.part, 0); task.wait(0.1); firetouchinterest(hrp, egg.part, 1)
+                    end
+                    if egg.prompt then fireproximityprompt(egg.prompt) end
+                    
+                    task.wait(0.2)
+                    
+                    -- Balik ke Base
+                    if baseCFrame then
+                        if stealSettings.method == "Fly" then
+                            flyTo(baseCFrame)
+                        else
+                            hrp.CFrame = baseCFrame
+                            task.wait(0.2)
                         end
                     end
                 else
-                    stLabel.Text = "Mencari telur..."
+                    stLabel.Text = "Mencari telur di luar base..."
+                    task.wait(1)
                 end
             end
         end)
     else
         btnStart.Text = "▶ START AUTO STEAL"
         btnStart.BackgroundColor3 = Color3.fromRGB(110, 20, 190)
-        stLabel.Text = "Auto Steal Berhenti."
+        stLabel.Text = "Berhenti."
+        toggleNoclip(false)
     end
 end)
 
--- Minimize Logic
-minBtn.MouseButton1Click:Connect(function()
-    f.Visible = false; minIcon.Visible = true
-end)
-minIcon.MouseButton1Click:Connect(function()
-    f.Visible = true; minIcon.Visible = false
-end)
+minBtn.MouseButton1Click:Connect(function() f.Visible = false; minIcon.Visible = true end)
+minIcon.MouseButton1Click:Connect(function() f.Visible = true; minIcon.Visible = false end)
