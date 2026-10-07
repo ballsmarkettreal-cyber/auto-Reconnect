@@ -1,0 +1,185 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local player = Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui")
+
+if gui:FindFirstChild("EX_StealAnEgg") then 
+    gui.EX_StealAnEgg:Destroy() 
+end
+
+local sg = Instance.new("ScreenGui", gui)
+sg.Name = "EX_StealAnEgg"
+sg.ResetOnSpawn = false
+
+-- Main Frame (Tema Ungu Blackhole Landscape)
+local f = Instance.new("Frame", sg)
+f.Size = UDim2.new(0, 380, 0, 245)
+f.Position = UDim2.new(0.5, -190, 0.5, -122)
+f.BackgroundColor3 = Color3.fromRGB(15, 10, 25)
+f.Active = true 
+f.Draggable = true
+
+local fCorner = Instance.new("UICorner", f)
+fCorner.CornerRadius = UDim.new(0, 12)
+
+-- Efek Gradasi Blackhole
+local gradient = Instance.new("UIGradient", f)
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 12, 75)),  
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 5, 15))     
+})
+gradient.Rotation = 45
+
+local stroke = Instance.new("UIStroke", f)
+stroke.Color = Color3.fromRGB(180, 50, 255)
+stroke.Thickness = 2
+
+-- Title / Header
+local title = Instance.new("TextLabel", f)
+title.Size = UDim2.new(1, -50, 0, 38)
+title.Position = UDim2.new(0, 15, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "⚡ EX Community - Steal An Egg"
+title.TextColor3 = Color3.fromRGB(240, 200, 255)
+title.TextSize = 13
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Tombol Minimize (-)
+local minBtn = Instance.new("TextButton", f)
+minBtn.Size = UDim2.new(0, 28, 0, 28)
+minBtn.Position = UDim2.new(1, -36, 0, 7)
+minBtn.BackgroundColor3 = Color3.fromRGB(30, 15, 50)
+minBtn.Text = "-"
+minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minBtn.TextSize = 16
+minBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
+
+-- Custom Icon "EX" (Saat Diminimalkan)
+local minIcon = Instance.new("TextButton", sg)
+minIcon.Size = UDim2.new(0, 55, 0, 55)
+minIcon.Position = UDim2.new(0, 20, 0, 20)
+minIcon.BackgroundColor3 = Color3.fromRGB(20, 10, 35)
+minIcon.Text = "EX"
+minIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+minIcon.TextSize = 18
+minIcon.Font = Enum.Font.FredokaOne
+minIcon.Visible = false
+minIcon.Active = true
+minIcon.Draggable = true
+Instance.new("UICorner", minIcon).CornerRadius = UDim.new(0, 12)
+
+local iconGrad = Instance.new("UIGradient", minIcon)
+iconGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 20, 220)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 10, 90))
+})
+iconGrad.Rotation = 45
+
+local iconStroke = Instance.new("UIStroke", minIcon)
+iconStroke.Color = Color3.fromRGB(210, 100, 255)
+iconStroke.Thickness = 2
+
+-- Scrolling Container untuk Menu Tombol
+local container = Instance.new("ScrollingFrame", f)
+container.Size = UDim2.new(0.9, 0, 0, 160)
+container.Position = UDim2.new(0.05, 0, 0, 48)
+container.BackgroundTransparency = 1
+container.CanvasSize = UDim2.new(0, 0, 0, 210)
+container.ScrollBarThickness = 4
+
+-- Fungsi Pembuat Tombol Menu
+local function createButton(text, yPos, callback)
+    local btn = Instance.new("TextButton", container)
+    btn.Size = UDim2.new(1, 0, 0, 36)
+    btn.Position = UDim2.new(0, 0, 0, yPos)
+    btn.Text = text
+    btn.BackgroundColor3 = Color3.fromRGB(30, 15, 50)
+    btn.TextColor3 = Color3.fromRGB(240, 200, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    
+    local btnStroke = Instance.new("UIStroke", btn)
+    btnStroke.Color = Color3.fromRGB(140, 40, 200)
+    btnStroke.Thickness = 1
+    
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
+
+-- 1. Tombol Instant Steal (Teleport ke Telur Terdekat)
+createButton("⚡ Instant Steal (Teleport ke Telur)", 0, function()
+    pcall(function()
+        local char = player.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+        
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and (obj.Name:lower():find("egg") or obj.Name:lower():find("telur")) then
+                local part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                if part then
+                    char.HumanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+                    break
+                end
+            end
+        end
+    end)
+end)
+
+-- 2. Tombol Hapus Partikel (Anti-Lag Visual)
+createButton("🧹 Hapus Partikel & Efek Berat", 44, function()
+    pcall(function()
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                v:Destroy()
+            end
+        end
+    end)
+end)
+
+-- 3. Tombol Hapus Hewan / Monster / Guardian (Boost FPS)
+createButton("🐾 Hapus Hewan & Monster (Hapus Lag)", 88, function()
+    pcall(function()
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v:IsA("Model") and (v.Name:lower():find("pet") or v.Name:lower():find("chicken") or v.Name:lower():find("guardian") or v.Name:lower():find("mob")) then
+                if not Players:GetPlayerFromCharacter(v) then
+                    v:Destroy()
+                end
+            end
+        end
+    end)
+end)
+
+-- 4. Tombol Optimasi Map & Plot
+createButton("🏡 Sembunyikan Plot / Dekorasi Berat", 132, function()
+    pcall(function()
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v:IsA("BasePart") and (v.Name:lower():find("decoration") or v.Name:lower():find("prop") or v.Name:lower():find("tree")) then
+                v.Transparency = 1
+                v.CanCollide = false
+            end
+        end
+    end)
+end)
+
+-- Status Bar
+local st = Instance.new("TextLabel", f)
+st.Size = UDim2.new(0.9, 0, 0, 20)
+st.Position = UDim2.new(0.05, 0, 0, 214)
+st.Text = "Status: EX Menu Siap Digunakan" 
+st.TextColor3 = Color3.fromRGB(200, 170, 230) 
+st.BackgroundTransparency = 1
+st.TextSize = 10
+st.Font = Enum.Font.GothamMedium
+
+-- Logika Minimize & Restore
+minBtn.MouseButton1Click:Connect(function()
+    f.Visible = false
+    minIcon.Visible = true
+end)
+
+minIcon.MouseButton1Click:Connect(function()
+    f.Visible = true
+    minIcon.Visible = false
+end)
