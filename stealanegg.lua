@@ -42,9 +42,9 @@ local title = Instance.new("TextLabel", header)
 title.Size = UDim2.new(1, -70, 1, 0)
 title.Position = UDim2.new(0, 15, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "⚡ EX COMMUNITY - STEAL AN EGG (V7)"
+title.Text = "⚡ EX COMMUNITY - STEAL AN EGG (V10 MASTER)"
 title.TextColor3 = Color3.fromRGB(230, 200, 255)
-title.TextSize = 11
+title.TextSize = 10
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -59,7 +59,7 @@ minBtn.Font = Enum.Font.GothamBold
 minBtn.TextSize = 12
 Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 4)
 
--- RESIZE HANDLE (Geser Pojok Kanan Bawah untuk Mengatur Ukuran UI)
+-- RESIZE HANDLE (Pojok Kanan Bawah)
 local resizeHandle = Instance.new("TextButton", f)
 resizeHandle.Size = UDim2.new(0, 18, 0, 18)
 resizeHandle.Position = UDim2.new(1, -20, 1, -20)
@@ -259,7 +259,7 @@ for rarity, state in pairs(config.filters) do
     yPosFilter = yPosFilter + 35
 end
 
--- KONTEN PERFORMA (DIJAMIN HAPUS PLOT, HEWAN, & TREADMILL)
+-- KONTEN PERFORMA
 local perfScroll = Instance.new("ScrollingFrame", pagePerf)
 perfScroll.Size = UDim2.new(0.9, 0, 0.9, 0)
 perfScroll.Position = UDim2.new(0.05, 0, 0.05, 0)
@@ -287,15 +287,12 @@ addPerfBtn("⬜ DISABLE 3D (Layar Putih Murni)", 0, function()
     pcall(function() RunService:Set3dRenderingEnabled(not is3DDisabled) end)
 end)
 
--- Tombol Pembersih Agresif (Hapus Plot, Base, Hewan/Pet, Dekorasi)
 addPerfBtn("🧹 Hapus Plot, Hewan & Dekorasi Map", 35, function()
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
             local name = v.Name:lower()
-            -- Hapus hewan/pet/guardian
             if v:IsA("Model") and (name:find("pet") or name:find("guardian") or name:find("mob") or name:find("animal")) then
                 if not Players:GetPlayerFromCharacter(v) then v:Destroy() end
-            -- Hapus plot / bangunan / pohon / dekorasi berat
             elseif v:IsA("BasePart") and (name:find("plot") or name:find("tree") or name:find("prop") or name:find("decora") or name:find("fence")) then
                 v:Destroy()
             end
@@ -303,7 +300,6 @@ addPerfBtn("🧹 Hapus Plot, Hewan & Dekorasi Map", 35, function()
     end)
 end)
 
--- Anti-Lag Treadmill (Pembersih Partikel +Speed & Billboards)
 local antiTreadmillLag = false
 addPerfBtn("🏃 Anti-Lag Treadmill (Auto Hapus Partikel)", 70, function()
     antiTreadmillLag = not antiTreadmillLag
@@ -317,14 +313,6 @@ addPerfBtn("🏃 Anti-Lag Treadmill (Auto Hapus Partikel)", 70, function()
                             v:Destroy()
                         elseif v:IsA("TextLabel") and (v.Text:find("+") or v.Text:lower():find("speed")) then
                             v:Destroy()
-                        end
-                    end
-                    local char = player.Character
-                    if char then
-                        for _, v in pairs(char:GetDescendants()) do
-                            if v:IsA("BillboardGui") or v:IsA("ParticleEmitter") or v:IsA("TextLabel") then
-                                v:Destroy()
-                            end
                         end
                     end
                 end)
@@ -346,7 +334,7 @@ addPerfBtn("🚀 SUPER FPS BOOST (Grafik Kentang)", 105, function()
     end)
 end)
 
--- LOGIKA NOCLIP & STEAL EGG
+-- LOGIKA NOCLIP & PENCARIAN TELUR V10 (MASTER PRECISION)
 local noclipConn
 local function toggleNoclip(state)
     if state then
@@ -363,42 +351,48 @@ local function toggleNoclip(state)
 end
 
 local function getBestEgg()
-    local possibleEggs = {}
+    local targetEgg = nil
+    local closestDist = math.huge
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    -- Scan semua ProximityPrompt atau objek bernuansa egg di Workspace
     for _, v in pairs(Workspace:GetDescendants()) do
         local n = v.Name:lower()
-        if v:IsA("BasePart") or v:IsA("Model") then
-            if n:find("egg") or n:find("telur") or n:find("spawn") then
-                if not v:IsA("Model") or not v:FindFirstChild("Humanoid") then
-                    table.insert(possibleEggs, v)
+        if v:IsA("ProximityPrompt") or n:find("egg") or n:find("telur") then
+            local part = nil
+            local parentObj = v.Parent
+            
+            if v:IsA("ProximityPrompt") then
+                part = parentObj:IsA("BasePart") and parentObj or (parentObj.PrimaryPart or parentObj:FindFirstChildWhichIsA("BasePart"))
+            elseif v:IsA("Model") then
+                part = v.PrimaryPart or v:FindFirstChildWhichIsA("BasePart")
+            elseif v:IsA("BasePart") then
+                part = v
+            end
+            
+            if part and not n:find("treadmill") and not n:find("belt") then
+                local dist = (part.Position - hrp.Position).Magnitude
+                -- Pastikan jaraknya di luar area base sendiri (> 25 stud) agar fokus ke telur map luar
+                if dist > 25 and dist < closestDist then
+                    closestDist = dist
+                    targetEgg = {
+                        part = part, 
+                        prompt = v:IsA("ProximityPrompt") and v or parentObj:FindFirstChildWhichIsA("ProximityPrompt", true), 
+                        name = parentObj.Name
+                    }
                 end
             end
         end
     end
-    
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-
-    local bestEgg = nil
-    local closestDist = math.huge
-
-    for _, obj in pairs(possibleEggs) do
-        local rootPart = obj:IsA("BasePart") and obj or (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart"))
-        if rootPart then
-            local dist = (rootPart.Position - hrp.Position).Magnitude
-            if dist > 15 and dist < closestDist then
-                closestDist = dist
-                bestEgg = {obj = obj, part = rootPart, name = obj.Name}
-            end
-        end
-    end
-    return bestEgg
+    return targetEgg
 end
 
 local function flyTo(targetCFrame)
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     local dist = (hrp.Position - targetCFrame.Position).Magnitude
-    local time = dist / 65 
+    local time = dist / 70 
     local tween = TweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
     tween:Play()
     tween.Completed:Wait()
@@ -409,7 +403,7 @@ btnStart.MouseButton1Click:Connect(function()
     if config.running then
         btnStart.Text = "⏹ STOP AUTO STEAL"
         btnStart.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-        statusLabel.Text = "Status: Berjalan (Mencari Telur)"
+        statusLabel.Text = "Status: Mencari & Mengambil Telur"
         
         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if hrp then baseCFrame = hrp.CFrame end 
@@ -426,28 +420,39 @@ btnStart.MouseButton1Click:Connect(function()
                 local egg = getBestEgg()
                 if egg then
                     statusLabel.Text = "Mencuri: " .. egg.name
+                    
                     if config.method == "Fly" then
-                        flyTo(egg.part.CFrame)
+                        flyTo(egg.part.CFrame + Vector3.new(0, 1, 0))
                     else
-                        hrp.CFrame = egg.part.CFrame
+                        hrp.CFrame = egg.part.CFrame + Vector3.new(0, 1, 0)
                         task.wait(0.1)
                     end
                     
+                    -- Eksekusi Interaksi Pengambilan (Prompt + Touch secara konsisten)
+                    if egg.prompt then
+                        pcall(function()
+                            fireproximityprompt(egg.prompt)
+                        end)
+                    end
                     if firetouchinterest then
                         firetouchinterest(hrp, egg.part, 0)
                         task.wait(0.05)
                         firetouchinterest(hrp, egg.part, 1)
                     end
-                    local prompt = egg.obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                    if prompt then fireproximityprompt(prompt) end
                     
                     task.wait(0.3)
                     
+                    -- Pulang ke Base
                     if baseCFrame then
-                        if config.method == "Fly" then flyTo(baseCFrame) else hrp.CFrame = baseCFrame; task.wait(0.1) end
+                        if config.method == "Fly" then
+                            flyTo(baseCFrame)
+                        else
+                            hrp.CFrame = baseCFrame
+                            task.wait(0.1)
+                        end
                     end
                 else
-                    statusLabel.Text = "Status: Mencari telur di map..."
+                    statusLabel.Text = "Status: Menunggu telur spawn..."
                     task.wait(1)
                 end
             end
