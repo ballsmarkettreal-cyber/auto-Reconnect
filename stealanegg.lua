@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
 local gui = player:WaitForChild("PlayerGui")
@@ -13,68 +14,41 @@ local sg = Instance.new("ScreenGui", gui)
 sg.Name = "EX_StealAnEgg_VIP"
 sg.ResetOnSpawn = false
 
--- ==========================================
--- LAYAR PUTIH MURNI (TANPA TEKS SAMA SEKALI)
--- ==========================================
+-- LAYAR PUTIH MURNI (DISABLE 3D)
 local whiteScreen = Instance.new("Frame", sg)
 whiteScreen.Size = UDim2.new(1, 0, 1, 0)
 whiteScreen.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 whiteScreen.Visible = false
 whiteScreen.ZIndex = -10 
 
--- ==========================================
--- UI SIDEBAR (DESAIN LEBIH KECIL & ELEGAN)
--- ==========================================
+-- UI UTAMA
 local f = Instance.new("Frame", sg)
 f.Size = UDim2.new(0, 460, 0, 270)
 f.Position = UDim2.new(0.5, -230, 0.5, -135)
-f.BackgroundColor3 = Color3.fromRGB(12, 10, 18) -- Warna dasar lebih gelap premium
+f.BackgroundColor3 = Color3.fromRGB(12, 10, 18)
 f.Active = true 
 f.Draggable = true
 Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
 Instance.new("UIStroke", f).Color = Color3.fromRGB(140, 50, 220)
 Instance.new("UIStroke", f).Thickness = 1.5
 
--- FITUR SKALA UI (BESAR/KECIL)
-local uiScale = Instance.new("UIScale", f)
-uiScale.Scale = 1
-
+-- HEADER
 local header = Instance.new("Frame", f)
 header.Size = UDim2.new(1, 0, 0, 35)
 header.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
 
 local title = Instance.new("TextLabel", header)
-title.Size = UDim2.new(1, -120, 1, 0)
+title.Size = UDim2.new(1, -70, 1, 0)
 title.Position = UDim2.new(0, 15, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "⚡ EX COMMUNITY - STEAL AN EGG (V5 PRO)"
+title.Text = "⚡ EX COMMUNITY - STEAL AN EGG (V7)"
 title.TextColor3 = Color3.fromRGB(230, 200, 255)
-title.TextSize = 11 -- Teks judul dikecilkan
+title.TextSize = 11
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol Resize UI (-)
-local btnMinScale = Instance.new("TextButton", header)
-btnMinScale.Size = UDim2.new(0, 25, 0, 25)
-btnMinScale.Position = UDim2.new(1, -95, 0, 5)
-btnMinScale.BackgroundColor3 = Color3.fromRGB(40, 25, 60)
-btnMinScale.Text = "🔍-"
-btnMinScale.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnMinScale.TextSize = 10
-Instance.new("UICorner", btnMinScale).CornerRadius = UDim.new(0, 4)
-
--- Tombol Resize UI (+)
-local btnMaxScale = Instance.new("TextButton", header)
-btnMaxScale.Size = UDim2.new(0, 25, 0, 25)
-btnMaxScale.Position = UDim2.new(1, -65, 0, 5)
-btnMaxScale.BackgroundColor3 = Color3.fromRGB(40, 25, 60)
-btnMaxScale.Text = "🔍+"
-btnMaxScale.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnMaxScale.TextSize = 10
-Instance.new("UICorner", btnMaxScale).CornerRadius = UDim.new(0, 4)
-
--- Tombol Minimize UI
+-- Tombol Minimize (-)
 local minBtn = Instance.new("TextButton", header)
 minBtn.Size = UDim2.new(0, 25, 0, 25)
 minBtn.Position = UDim2.new(1, -35, 0, 5)
@@ -85,14 +59,37 @@ minBtn.Font = Enum.Font.GothamBold
 minBtn.TextSize = 12
 Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 4)
 
--- Logika Skala UI (Zoom In / Zoom Out)
-btnMinScale.MouseButton1Click:Connect(function()
-    uiScale.Scale = math.clamp(uiScale.Scale - 0.1, 0.5, 2)
+-- RESIZE HANDLE (Geser Pojok Kanan Bawah untuk Mengatur Ukuran UI)
+local resizeHandle = Instance.new("TextButton", f)
+resizeHandle.Size = UDim2.new(0, 18, 0, 18)
+resizeHandle.Position = UDim2.new(1, -20, 1, -20)
+resizeHandle.BackgroundColor3 = Color3.fromRGB(120, 40, 200)
+resizeHandle.Text = "◢"
+resizeHandle.TextColor3 = Color3.fromRGB(255, 255, 255)
+resizeHandle.TextSize = 10
+Instance.new("UICorner", resizeHandle).CornerRadius = UDim.new(0, 3)
+
+local resizing = false
+resizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing = true
+    end
 end)
-btnMaxScale.MouseButton1Click:Connect(function()
-    uiScale.Scale = math.clamp(uiScale.Scale + 0.1, 0.5, 2)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing = false
+    end
+end)
+RunService.RenderStepped:Connect(function()
+    if resizing then
+        local mousePos = UserInputService:GetMouseLocation()
+        local newSizeX = math.clamp(mousePos.X - f.AbsolutePosition.X, 350, 700)
+        local newSizeY = math.clamp(mousePos.Y - f.AbsolutePosition.Y, 200, 500)
+        f.Size = UDim2.new(0, newSizeX, 0, newSizeY)
+    end
 end)
 
+-- ICON MINIMIZE MUNGIL
 local minIcon = Instance.new("TextButton", sg)
 minIcon.Size = UDim2.new(0, 40, 0, 40)
 minIcon.Position = UDim2.new(0, 20, 0, 20)
@@ -108,6 +105,7 @@ Instance.new("UICorner", minIcon).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", minIcon).Color = Color3.fromRGB(150, 50, 220)
 Instance.new("UIStroke", minIcon).Thickness = 1.5
 
+-- SIDEBAR & HALAMAN
 local sidebar = Instance.new("Frame", f)
 sidebar.Size = UDim2.new(0, 120, 1, -35)
 sidebar.Position = UDim2.new(0, 0, 0, 35)
@@ -126,7 +124,7 @@ local function createTab(name, yPos, isFirst)
     btn.Position = UDim2.new(0, 5, 0, yPos)
     btn.Text = name
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 10 -- Teks tab dikecilkan
+    btn.TextSize = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
     
     local page = Instance.new("Frame", pageContainer)
@@ -179,7 +177,7 @@ btnMethod.Text = "Metode: TERBANG (Aman Noclip)"
 btnMethod.BackgroundColor3 = Color3.fromRGB(35, 20, 60)
 btnMethod.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnMethod.Font = Enum.Font.GothamMedium
-btnMethod.TextSize = 10 -- Teks tombol lebih proporsional
+btnMethod.TextSize = 10
 Instance.new("UICorner", btnMethod).CornerRadius = UDim.new(0, 4)
 
 local btnTarget = Instance.new("TextButton", pageMain)
@@ -206,7 +204,7 @@ local statusLabel = Instance.new("TextLabel", pageMain)
 statusLabel.Size = UDim2.new(0.9, 0, 0, 25)
 statusLabel.Position = UDim2.new(0.05, 0, 0, 140)
 statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Berdiri di base kamu lalu klik START"
+statusLabel.Text = "Status: Siap dijalankan"
 statusLabel.TextColor3 = Color3.fromRGB(180, 150, 220)
 statusLabel.Font = Enum.Font.GothamMedium
 statusLabel.TextSize = 10
@@ -214,12 +212,13 @@ statusLabel.TextSize = 10
 btnMethod.MouseButton1Click:Connect(function()
     if config.method == "Fly" then
         config.method = "Instant"
-        btnMethod.Text = "Metode: INSTAN (Teleport Cepat)"
+        btnMethod.Text = "Metode: INSTAN (Teleport)"
     else
         config.method = "Fly"
         btnMethod.Text = "Metode: TERBANG (Aman Noclip)"
     end
 end)
+
 btnTarget.MouseButton1Click:Connect(function()
     if config.target == "All" then
         config.target = "Filter"
@@ -260,7 +259,7 @@ for rarity, state in pairs(config.filters) do
     yPosFilter = yPosFilter + 35
 end
 
--- KONTEN PERFORMA
+-- KONTEN PERFORMA (DIJAMIN HAPUS PLOT, HEWAN, & TREADMILL)
 local perfScroll = Instance.new("ScrollingFrame", pagePerf)
 perfScroll.Size = UDim2.new(0.9, 0, 0.9, 0)
 perfScroll.Position = UDim2.new(0.05, 0, 0.05, 0)
@@ -288,31 +287,44 @@ addPerfBtn("⬜ DISABLE 3D (Layar Putih Murni)", 0, function()
     pcall(function() RunService:Set3dRenderingEnabled(not is3DDisabled) end)
 end)
 
-addPerfBtn("🧹 Bersihkan Map (Hapus Plot/Pet)", 35, function()
+-- Tombol Pembersih Agresif (Hapus Plot, Base, Hewan/Pet, Dekorasi)
+addPerfBtn("🧹 Hapus Plot, Hewan & Dekorasi Map", 35, function()
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("Model") and (v.Name:lower():find("pet") or v.Name:lower():find("guardian")) then
+            local name = v.Name:lower()
+            -- Hapus hewan/pet/guardian
+            if v:IsA("Model") and (name:find("pet") or name:find("guardian") or name:find("mob") or name:find("animal")) then
                 if not Players:GetPlayerFromCharacter(v) then v:Destroy() end
-            end
-            if v:IsA("BasePart") and (v.Name:lower():find("tree") or v.Name:lower():find("prop") or v.Name:lower():find("decora")) then
-                v.Transparency = 1; v.CanCollide = false
+            -- Hapus plot / bangunan / pohon / dekorasi berat
+            elseif v:IsA("BasePart") and (name:find("plot") or name:find("tree") or name:find("prop") or name:find("decora") or name:find("fence")) then
+                v:Destroy()
             end
         end
     end)
 end)
 
+-- Anti-Lag Treadmill (Pembersih Partikel +Speed & Billboards)
 local antiTreadmillLag = false
-addPerfBtn("🏃 Anti-Lag Treadmill", 70, function()
+addPerfBtn("🏃 Anti-Lag Treadmill (Auto Hapus Partikel)", 70, function()
     antiTreadmillLag = not antiTreadmillLag
     if antiTreadmillLag then
         task.spawn(function()
             while antiTreadmillLag do
-                task.wait(0.2)
+                task.wait(0.1)
                 pcall(function()
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if v:IsA("ParticleEmitter") or v:IsA("BillboardGui") or v:IsA("Trail") then
+                            v:Destroy()
+                        elseif v:IsA("TextLabel") and (v.Text:find("+") or v.Text:lower():find("speed")) then
+                            v:Destroy()
+                        end
+                    end
                     local char = player.Character
                     if char then
                         for _, v in pairs(char:GetDescendants()) do
-                            if v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("ParticleEmitter") then v:Destroy() end
+                            if v:IsA("BillboardGui") or v:IsA("ParticleEmitter") or v:IsA("TextLabel") then
+                                v:Destroy()
+                            end
                         end
                     end
                 end)
@@ -354,9 +366,11 @@ local function getBestEgg()
     local possibleEggs = {}
     for _, v in pairs(Workspace:GetDescendants()) do
         local n = v.Name:lower()
-        if (v:IsA("Model") or v:IsA("BasePart")) and (n:find("egg") or n:find("telur")) then
-            if v.Parent and not v.Parent:FindFirstChild("Humanoid") then
-                table.insert(possibleEggs, v)
+        if v:IsA("BasePart") or v:IsA("Model") then
+            if n:find("egg") or n:find("telur") or n:find("spawn") then
+                if not v:IsA("Model") or not v:FindFirstChild("Humanoid") then
+                    table.insert(possibleEggs, v)
+                end
             end
         end
     end
@@ -367,27 +381,13 @@ local function getBestEgg()
     local bestEgg = nil
     local closestDist = math.huge
 
-    for _, eggObj in pairs(possibleEggs) do
-        local pass = true
-        local n = eggObj.Name:lower()
-        local rootPart = eggObj:IsA("BasePart") and eggObj or (eggObj.PrimaryPart or eggObj:FindFirstChildWhichIsA("BasePart"))
-        
+    for _, obj in pairs(possibleEggs) do
+        local rootPart = obj:IsA("BasePart") and obj or (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart"))
         if rootPart then
-            if baseCFrame and (rootPart.Position - baseCFrame.Position).Magnitude < 25 then
-                pass = false 
-            end
-            if pass and config.target == "Filter" then
-                pass = false
-                for rName, rActive in pairs(config.filters) do
-                    if rActive and n:find(rName:lower()) then pass = true; break end
-                end
-            end
-            if pass then
-                local dist = (rootPart.Position - hrp.Position).Magnitude
-                if dist < closestDist then
-                    closestDist = dist
-                    bestEgg = {obj = eggObj, part = rootPart, name = eggObj.Name}
-                end
+            local dist = (rootPart.Position - hrp.Position).Magnitude
+            if dist > 15 and dist < closestDist then
+                closestDist = dist
+                bestEgg = {obj = obj, part = rootPart, name = obj.Name}
             end
         end
     end
@@ -409,6 +409,7 @@ btnStart.MouseButton1Click:Connect(function()
     if config.running then
         btnStart.Text = "⏹ STOP AUTO STEAL"
         btnStart.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        statusLabel.Text = "Status: Berjalan (Mencari Telur)"
         
         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if hrp then baseCFrame = hrp.CFrame end 
@@ -416,7 +417,7 @@ btnStart.MouseButton1Click:Connect(function()
         
         task.spawn(function()
             while config.running do
-                task.wait(0.1)
+                task.wait(0.2)
                 local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
                 if not hrp then continue end
                 
@@ -440,21 +441,22 @@ btnStart.MouseButton1Click:Connect(function()
                     local prompt = egg.obj:FindFirstChildWhichIsA("ProximityPrompt", true)
                     if prompt then fireproximityprompt(prompt) end
                     
-                    task.wait(0.2)
+                    task.wait(0.3)
                     
                     if baseCFrame then
                         if config.method == "Fly" then flyTo(baseCFrame) else hrp.CFrame = baseCFrame; task.wait(0.1) end
                     end
                 else
-                    statusLabel.Text = "Mencari telur... (Pastikan ada telur yg cocok)"
+                    statusLabel.Text = "Status: Mencari telur di map..."
                     task.wait(1)
                 end
             end
         end)
     else
+        config.running = false
         btnStart.Text = "▶ START AUTO STEAL"
         btnStart.BackgroundColor3 = Color3.fromRGB(110, 30, 200)
-        statusLabel.Text = "Berhenti."
+        statusLabel.Text = "Status: Berhenti"
         toggleNoclip(false)
     end
 end)
