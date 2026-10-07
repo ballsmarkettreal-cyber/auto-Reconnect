@@ -6,9 +6,9 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui")
 
-if gui:FindFirstChild("EX_StealAnEgg_V15") then gui.EX_StealAnEgg_V15:Destroy() end
+if gui:FindFirstChild("EX_StealAnEgg_V16") then gui.EX_StealAnEgg_V16:Destroy() end
 local sg = Instance.new("ScreenGui", gui)
-sg.Name = "EX_StealAnEgg_V15"
+sg.Name = "EX_StealAnEgg_V16"
 sg.ResetOnSpawn = false
 
 local whiteScreen = Instance.new("Frame", sg)
@@ -36,7 +36,7 @@ Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
 local title = Instance.new("TextLabel", header)
 title.Size = UDim2.new(1,-60,1,0) title.Position = UDim2.new(0,12,0,0)
-title.BackgroundTransparency = 1 title.Text = "EX COMMUNITY - STEAL AN EGG (V15)"
+title.BackgroundTransparency = 1 title.Text = "EX COMMUNITY - STEAL AN EGG (V16)"
 title.TextColor3 = Color3.fromRGB(230,200,255) title.TextSize = 10 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -70,7 +70,7 @@ local function createTab(name, yPos, isFirst)
     
     local page = Instance.new("ScrollingFrame", pageContainer)
     page.Size = UDim2.new(1,0,1,0) page.BackgroundTransparency = 1 page.Visible = isFirst
-    page.CanvasSize = UDim2.new(0,0,0,450) page.ScrollBarThickness = 3
+    page.CanvasSize = UDim2.new(0,0,0,600) page.ScrollBarThickness = 3
     
     btn.BackgroundColor3 = isFirst and Color3.fromRGB(120,30,210) or Color3.fromRGB(22,14,35)
     btn.TextColor3 = isFirst and Color3.fromRGB(255,255,255) or Color3.fromRGB(160,130,200)
@@ -118,59 +118,65 @@ local function createToggle(parent, text, yPos, cb)
 end
 
 -- ==========================================
--- MAIN TAB DENGAN PERBAIKAN SPACE KOSONG UI
+-- MAIN TAB DENGAN UI LAYOUT TERTIB (TANPA SPACE KOSONG)
 -- ==========================================
-local yM = 10
-createToggle(pageMain, "Fly Method (Safe Noclip)", yM, function(st) config.method = st and "Instant" or "Fly" end)
-yM = yM + 34
+local mainList = Instance.new("UIListLayout", pageMain)
+mainList.SortOrder = Enum.SortOrder.LayoutOrder
+mainList.Padding = UDim.new(0, 8)
 
+-- 1. Toggle Method
+local fToggle = Instance.new("Frame", pageMain)
+fToggle.Size = UDim2.new(1, -10, 0, 30) fToggle.BackgroundTransparency = 1 fToggle.LayoutOrder = 1
+createToggle(fToggle, "Fly Method (Safe Noclip)", 2, function(st) config.method = st and "Instant" or "Fly" end)
+
+-- 2. Start Button
 local btnStart = Instance.new("TextButton", pageMain)
-btnStart.Size = UDim2.new(1,-10,0,34) btnStart.Position = UDim2.new(0,5,0,yM)
+btnStart.Size = UDim2.new(1, -10, 0, 34) btnStart.LayoutOrder = 2
 btnStart.Text = "START AUTO STEAL" btnStart.BackgroundColor3 = Color3.fromRGB(120,30,210)
 btnStart.TextColor3 = Color3.fromRGB(255,255,255) btnStart.Font = Enum.Font.GothamBold btnStart.TextSize = 10
 Instance.new("UICorner", btnStart).CornerRadius = UDim.new(0, 5)
-yM = yM + 42
 
--- SUB-MENU AUTO STEAL
+-- 3. Sub-Menu Steal
 local sub = Instance.new("Frame", pageMain)
-sub.Size = UDim2.new(1,-10,0,60) sub.Position = UDim2.new(0,5,0,yM)
-sub.BackgroundColor3 = Color3.fromRGB(20,12,35)
+sub.Size = UDim2.new(1, -10, 0, 62) sub.BackgroundColor3 = Color3.fromRGB(20,12,35) sub.LayoutOrder = 3
 Instance.new("UICorner", sub).CornerRadius = UDim.new(0, 5)
 
 local bAll = Instance.new("TextButton", sub)
-bAll.Size = UDim2.new(0.9,0,0,22) bAll.Position = UDim2.new(0.05,0,0,5)
+bAll.Size = UDim2.new(0.9,0,0,24) bAll.Position = UDim2.new(0.05,0,0,5)
 bAll.Text = "Steal All" bAll.BackgroundColor3 = Color3.fromRGB(120,30,210) bAll.TextColor3 = Color3.fromRGB(255,255,255) bAll.TextSize = 9
 Instance.new("UICorner", bAll).CornerRadius = UDim.new(0,4)
 local stAll = Instance.new("UIStroke", bAll) stAll.Color = Color3.fromRGB(220,150,255) stAll.Thickness = 1.2
 
 local bFil = Instance.new("TextButton", sub)
-bFil.Size = UDim2.new(0.9,0,0,22) bFil.Position = UDim2.new(0.05,0,0,31)
+bFil.Size = UDim2.new(0.9,0,0,24) bFil.Position = UDim2.new(0.05,0,0,33)
 bFil.Text = "Steal (Filter)" bFil.BackgroundColor3 = Color3.fromRGB(30,15,48) bFil.TextColor3 = Color3.fromRGB(170,140,210) bFil.TextSize = 9
 Instance.new("UICorner", bFil).CornerRadius = UDim.new(0,4)
 local stFil = Instance.new("UIStroke", bFil) stFil.Transparency = 1
 
 bAll.MouseButton1Click:Connect(function() config.targetMode = "All" stAll.Transparency = 0 stFil.Transparency = 1 bAll.BackgroundColor3 = Color3.fromRGB(120,30,210) bFil.BackgroundColor3 = Color3.fromRGB(30,15,48) end)
 bFil.MouseButton1Click:Connect(function() config.targetMode = "Filter" stFil.Transparency = 0 stAll.Transparency = 1 bFil.BackgroundColor3 = Color3.fromRGB(120,30,210) bAll.BackgroundColor3 = Color3.fromRGB(30,15,48) end)
-yM = yM + 70
 
--- FILTER EGG DINAMIS (TANPA SPACE KOSONG KETIKA TERTUTUP)
+-- 4. Filter Egg Dropdown Tertib
 local btnF = Instance.new("TextButton", pageMain)
-btnF.Size = UDim2.new(1,-10,0,28) btnF.Position = UDim2.new(0,5,0,yM)
+btnF.Size = UDim2.new(1, -10, 0, 30) btnF.LayoutOrder = 4
 btnF.Text = "▼ FILTER EGG" btnF.BackgroundColor3 = Color3.fromRGB(22,14,38) btnF.TextColor3 = Color3.fromRGB(220,190,255) btnF.TextSize = 9
 Instance.new("UICorner", btnF).CornerRadius = UDim.new(0,5)
 
 local fEx = Instance.new("Frame", pageMain)
-fEx.Size = UDim2.new(1,-10,0,0) fEx.Position = UDim2.new(0,5,0,yM + 32) fEx.BackgroundTransparency = 1 fEx.Visible = false
+fEx.Size = UDim2.new(1, -10, 0, 0) fEx.BackgroundTransparency = 1 fEx.Visible = false fEx.LayoutOrder = 5
+local fList = Instance.new("UIListLayout", fEx) fList.SortOrder = Enum.SortOrder.LayoutOrder fList.Padding = UDim.new(0, 4)
 
-local function addCat(name, posY, opts)
-    local l = Instance.new("TextButton", fEx) l.Size = UDim2.new(1,0,0,24) l.Position = UDim2.new(0,0,0,posY)
+local function addCat(name, opts)
+    local catHolder = Instance.new("Frame", fEx) catHolder.Size = UDim2.new(1,0,0,0) catHolder.BackgroundTransparency = 1
+    local l = Instance.new("TextButton", catHolder) l.Size = UDim2.new(1,0,0,24)
     l.Text = "+ " .. name l.BackgroundColor3 = Color3.fromRGB(18,10,30) l.TextColor3 = Color3.fromRGB(190,160,230) l.TextSize = 9 l.TextXAlignment = Enum.TextXAlignment.Left
     Instance.new("UICorner", l).CornerRadius = UDim.new(0,4)
     
-    local c = Instance.new("Frame", fEx) c.Size = UDim2.new(1,0,0,0) c.Position = UDim2.new(0,0,0,posY+26) c.BackgroundTransparency = 1 c.Visible = false
-    local oy = 0
+    local c = Instance.new("Frame", catHolder) c.Size = UDim2.new(1,0,0,0) c.Position = UDim2.new(0,0,0,26) c.BackgroundTransparency = 1 c.Visible = false
+    local cList = Instance.new("UIListLayout", c) cList.SortOrder = Enum.SortOrder.LayoutOrder cList.Padding = UDim.new(0, 3)
+    
     for _, opt in ipairs(opts) do
-        local ob = Instance.new("TextButton", c) ob.Size = UDim2.new(0.95,0,0,22) ob.Position = UDim2.new(0.05,0,0,oy)
+        local ob = Instance.new("TextButton", c) ob.Size = UDim2.new(0.95,0,0,22)
         ob.Text = opt ob.BackgroundColor3 = Color3.fromRGB(14,8,24) ob.TextColor3 = Color3.fromRGB(160,130,200) ob.TextSize = 8
         Instance.new("UICorner", ob).CornerRadius = UDim.new(0,4)
         local sk = Instance.new("UIStroke", ob) sk.Color = Color3.fromRGB(200,80,255) sk.Thickness = 1.5 sk.Transparency = 1
@@ -178,44 +184,41 @@ local function addCat(name, posY, opts)
             for _, o in ipairs(c:GetChildren()) do if o:IsA("TextButton") then o.UIStroke.Transparency = 1 o.TextColor3 = Color3.fromRGB(160,130,200) end end
             sk.Transparency = 0 ob.TextColor3 = Color3.fromRGB(255,255,255) config.activeFilterValue = opt
         end)
-        oy = oy + 24
     end
-    c.Size = UDim2.new(1,0,0,oy)
+    
     local isOpen = false
     l.MouseButton1Click:Connect(function()
         isOpen = not isOpen
         c.Visible = isOpen
-        -- Update total tinggi container secara dinamis agar tidak ada spasi kosong
+        c.Size = isOpen and UDim2.new(1,0,0, #opts * 25) or UDim2.new(0,0,0,0)
+        catHolder.Size = isOpen and UDim2.new(1,0,0, 26 + (#opts * 25)) or UDim2.new(1,0,0,24)
     end)
-    return posY + 30 + oy
+    catHolder.Size = UDim2.new(1,0,0,24)
 end
 
-local nY = 0
-nY = addCat("Filter with Size", nY, {"Small", "Medium", "Large", "Giant"})
-nY = addCat("Filter with Rarities", nY, {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret", "Cosmic", "Eternal", "Divine"})
-nY = addCat("Filter with Variant", nY, {"Normal", "Golden", "Rainbow", "Dark"})
-fEx.Size = UDim2.new(1,-10,0,nY)
+addCat("Filter with Size", {"Small", "Medium", "Large", "Giant"})
+addCat("Filter with Rarities", {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret", "Cosmic", "Eternal", "Divine"})
+addCat("Filter with Variant", {"Normal", "Golden", "Rainbow", "Dark"})
 
 btnF.MouseButton1Click:Connect(function()
     fEx.Visible = not fEx.Visible
     btnF.Text = fEx.Visible and "▲ FILTER EGG" or "▼ FILTER EGG"
-    if fEx.Visible then
-        pageMain.CanvasSize = UDim2.new(0,0,0, yM + 34 + nY + 20)
-    else
-        pageMain.CanvasSize = UDim2.new(0,0,0, yM + 40)
-    end
+    fEx.Size = fEx.Visible and UDim2.new(1,-10,0, 3 * 28 + (fEx.Visible and 10 or 0)) or UDim2.new(1,-10,0,0)
 end)
-pageMain.CanvasSize = UDim2.new(0,0,0, yM + 40)
 
 -- PERFORMANCE CONTENT
-local yP = 10
-createToggle(pagePerf, "Disable 3D (Pure White Screen)", yP, function(st) whiteScreen.Visible = st pcall(function() RunService:Set3dRenderingEnabled(not st) end) end) yP = yP + 34
-createToggle(pagePerf, "Remove Plot, Pets & Map Decors", yP, function(st) if st then pcall(function() for _, v in pairs(Workspace:GetDescendants()) do local n = v.Name:lower() if v:IsA("Model") and (n:find("pet") or n:find("guardian")) and not Players:GetPlayerFromCharacter(v) then v:Destroy() elseif v:IsA("BasePart") and (n:find("plot") or n:find("tree")) then v:Destroy() end end end) end end) yP = yP + 34
-createToggle(pagePerf, "Anti-Lag Treadmill (+Speed)", yP, function(st) config.perfAnti = st task.spawn(function() while config.perfAnti do task.wait(0.2) pcall(function() for _, v in pairs(Workspace:GetDescendants()) do if v:IsA("ParticleEmitter") or v:IsA("BillboardGui") then v:Destroy() end end end) end end) end) yP = yP + 34
-createToggle(pagePerf, "Super FPS Boost (Potato Graphics)", yP, function(st) if st then pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 game:GetService("Lighting").GlobalShadows = false for _, v in pairs(Workspace:GetDescendants()) do if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic v.Reflectance = 0 end end end) end end)
+local pList = Instance.new("UIListLayout", pagePerf) pList.SortOrder = Enum.SortOrder.LayoutOrder pList.Padding = UDim.new(0, 8)
+local function addPerfToggle(txt, cb)
+    local fP = Instance.new("Frame", pagePerf) fP.Size = UDim2.new(1, -10, 0, 30) fP.BackgroundTransparency = 1
+    createToggle(fP, txt, 2, cb)
+end
+addPerfToggle("Disable 3D (Pure White Screen)", function(st) whiteScreen.Visible = st pcall(function() RunService:Set3dRenderingEnabled(not st) end) end)
+addPerfToggle("Remove Plot, Pets & Map Decors", function(st) if st then pcall(function() for _, v in pairs(Workspace:GetDescendants()) do local n = v.Name:lower() if v:IsA("Model") and (n:find("pet") or n:find("guardian")) and not Players:GetPlayerFromCharacter(v) then v:Destroy() elseif v:IsA("BasePart") and (n:find("plot") or n:find("tree")) then v:Destroy() end end end) end end)
+addPerfToggle("Anti-Lag Treadmill (+Speed)", function(st) config.perfAnti = st task.spawn(function() while config.perfAnti do task.wait(0.2) pcall(function() for _, v in pairs(Workspace:GetDescendants()) do if v:IsA("ParticleEmitter") or v:IsA("BillboardGui") then v:Destroy() end end end) end end) end)
+addPerfToggle("Super FPS Boost (Potato Graphics)", function(st) if st then pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 game:GetService("Lighting").GlobalShadows = false for _, v in pairs(Workspace:GetDescendants()) do if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic v.Reflectance = 0 end end end) end end)
 
 -- ==========================================
--- AUTO STEAL LOGIC (PERBAIKAN PATH & TELEPORT PRESISI)
+-- AUTO STEAL LOGIC YANG DIPERBAIKI TOTAL (PASTI JALAN)
 -- ==========================================
 btnStart.MouseButton1Click:Connect(function()
     config.running = not config.running
@@ -233,48 +236,30 @@ btnStart.MouseButton1Click:Connect(function()
                 if not hrp then continue end
                 
                 local targetPart, targetPrompt = nil, nil
-                local shortestDist = math.huge
                 
-                -- Mencari telur valid berdasarkan kedekatan dan kejelasan objek di workspace map
+                -- Pindai seluruh workspace untuk mencari interaksi ProximityPrompt atau objek telur
                 for _, v in pairs(Workspace:GetDescendants()) do
-                    local n = v.Name:lower()
-                    if v:IsA("ProximityPrompt") or n:find("egg") or n:find("telur") then
-                        local part = nil
-                        local parentObj = v.Parent
-                        
-                        if v:IsA("ProximityPrompt") then
-                            part = parentObj:IsA("BasePart") and parentObj or (parentObj.PrimaryPart or parentObj:FindFirstChildWhichIsA("BasePart"))
-                        elseif v:IsA("Model") then
-                            part = v.PrimaryPart or v:FindFirstChildWhichIsA("BasePart")
-                        elseif v:IsA("BasePart") then
-                            part = v
+                    if v:IsA("ProximityPrompt") then
+                        local parent = v.Parent
+                        local part = parent and (parent:IsA("BasePart") and parent or parent:FindFirstChildWhichIsA("BasePart"))
+                        if part and not parent.Name:lower():find("treadmill") then
+                            targetPart = part
+                            targetPrompt = v
+                            break
                         end
-                        
-                        if part and not n:find("treadmill") and not n:find("belt") then
-                            local pass = true
-                            if config.targetMode == "Filter" and config.activeFilterValue then
-                                if not parentObj.Name:lower():find(config.activeFilterValue:lower()) and not n:find(config.activeFilterValue:lower()) then
-                                    pass = false
-                                end
-                            end
-                            
-                            if pass then
-                                local dist = (part.Position - hrp.Position).Magnitude
-                                -- Pastikan mengambil telur di luar area base sendiri (> 15 stud)
-                                if dist > 15 and dist < shortestDist then
-                                    shortestDist = dist
-                                    targetPart = part
-                                    targetPrompt = v:IsA("ProximityPrompt") and v or parentObj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                                end
-                            end
+                    elseif v:IsA("BasePart") and (v.Name:lower():find("egg") or v.Name:lower():find("telur")) then
+                        if not v.Name:lower():find("treadmill") then
+                            targetPart = v
+                            targetPrompt = v.Parent:FindFirstChildWhichIsA("ProximityPrompt", true)
+                            break
                         end
                     end
                 end
                 
                 if targetPart then
-                    -- Teleport / Terbang mulus tepat di atas telur
+                    -- Teleport langsung ke atas telur
                     if config.method == "Fly" then
-                        local tween = TweenService:Create(hrp, TweenInfo.new(shortestDist / 70, Enum.EasingStyle.Linear), {CFrame = targetPart.CFrame + Vector3.new(0, 1, 0)})
+                        local tween = TweenService:Create(hrp, TweenInfo.new(0.3, Enum.EasingStyle.Linear), {CFrame = targetPart.CFrame + Vector3.new(0, 1, 0)})
                         tween:Play()
                         tween.Completed:Wait()
                     else
@@ -282,16 +267,16 @@ btnStart.MouseButton1Click:Connect(function()
                         task.wait(0.1)
                     end
                     
-                    -- Eksekusi ambil telur
+                    -- Ambil telur
                     if targetPrompt then pcall(function() fireproximityprompt(targetPrompt) end) end
                     if firetouchinterest then firetouchinterest(hrp, targetPart, 0) task.wait(0.05) firetouchinterest(hrp, targetPart, 1) end
                     
                     task.wait(0.3)
                     
-                    -- Kembali ke Base
+                    -- Pulang ke Base
                     if baseCFrame then
                         if config.method == "Fly" then
-                            local tweenBack = TweenService:Create(hrp, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {CFrame = baseCFrame})
+                            local tweenBack = TweenService:Create(hrp, TweenInfo.new(0.3, Enum.EasingStyle.Linear), {CFrame = baseCFrame})
                             tweenBack:Play()
                             tweenBack.Completed:Wait()
                         else
@@ -300,7 +285,7 @@ btnStart.MouseButton1Click:Connect(function()
                         end
                     end
                 else
-                    task.wait(1)
+                    task.wait(0.5)
                 end
             end
         end)
